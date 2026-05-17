@@ -1,18 +1,19 @@
 import type { NextConfig } from "next";
 
-// Only use the sub-path prefix when building on GitHub Actions for Pages
-const isGitHubPages = process.env.GITHUB_ACTIONS === 'true';
+const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
   output: 'export',
-  basePath: isGitHubPages ? '/novice' : '',
+  // Only prefix with /novice if we are actually building for production
+  basePath: isProd ? '/novice' : '',
+  assetPrefix: isProd ? '/novice/' : '',
   images: {
     unoptimized: true,
   },
   experimental: {
-    // Allow any local network IP to access dev resources
-    allowedDevOrigins: ['localhost:3000', '192.168.56.1', '0.0.0.0:3000'],
+    // Allow the local IP and common dev hosts
+    allowedDevOrigins: ['localhost:3000', '192.168.56.1', '127.0.0.1:3000', '0.0.0.0:3000'],
   },
 };
 
