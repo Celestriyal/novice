@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
-import { useParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Plus, 
   Trash2, 
@@ -18,9 +18,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export default function SubjectDetailPage() {
-  const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const subjectId = params.id as string;
+  const subjectId = searchParams.get('id');
   
   const { 
     subjects, 
@@ -59,7 +59,7 @@ export default function SubjectDetailPage() {
   const handleAddSubtopic = (e: React.FormEvent) => {
     e.preventDefault();
     if (newSubtopicName.trim()) {
-      addSubtopic(subjectId, newSubtopicName.trim());
+      addSubtopic(subject.id, newSubtopicName.trim());
       setNewSubtopicName('');
     }
   };

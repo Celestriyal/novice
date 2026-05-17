@@ -22,7 +22,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
+    // Force load after 5 seconds if Firebase doesn't respond
+    const forceLoadTimeout = setTimeout(() => {
+      console.warn("Auth took too long, forcing load...");
+      setLoading(false);
+    }, 5000);
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      clearTimeout(forceLoadTimeout);
       setUser(user);
       setLoading(false);
       
@@ -34,7 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearTimeout(forceLoadTimeout);
+    };
   }, [pathname, router]);
 
   if (loading) {

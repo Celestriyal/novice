@@ -14,19 +14,23 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Validate config to prevent blank screen crashes
-if (!firebaseConfig.apiKey && typeof window !== "undefined") {
-  console.warn("Firebase API Key is missing. Check your .env.local file.");
+let app: any;
+let auth: any;
+let db: any;
+
+try {
+  if (firebaseConfig.apiKey) {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  }
+} catch (error) {
+  console.error("Firebase failed to initialize:", error);
 }
 
-// Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
 // Analytics is client-side only
-let analytics;
-if (typeof window !== "undefined") {
+let analytics: any;
+if (typeof window !== "undefined" && app) {
   isSupported().then((supported) => {
     if (supported) {
       analytics = getAnalytics(app);

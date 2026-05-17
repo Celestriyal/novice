@@ -128,7 +128,7 @@ export default function SubjectsPage() {
 
                   <div className="pt-2 mt-auto">
                     <Link
-                      href={`/subjects/${subject.id}`}
+                      href={`/subjects/detail?id=${subject.id}`}
                       className="flex items-center justify-between w-full px-4 py-2 bg-secondary rounded-lg text-sm font-medium hover:bg-muted transition-colors group/link"
                     >
                       View Subtopics
