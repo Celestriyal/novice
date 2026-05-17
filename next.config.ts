@@ -12,6 +12,12 @@ const nextConfig: NextConfig & { allowedDevOrigins?: string[] } = {
   images: {
     unoptimized: true,
   },
+  devIndicators: {
+    appIsrStatus: false,
+    buildActivity: false,
+    appIsrStatusPosition: 'bottom-right',
+    buildActivityPosition: 'bottom-right',
+  },
   // Allow the local IP and common dev hosts
   allowedDevOrigins: ['localhost:3000', '192.168.56.1', '127.0.0.1:3000', '0.0.0.0:3000'],
 };
