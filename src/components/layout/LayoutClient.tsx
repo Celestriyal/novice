@@ -13,7 +13,6 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <SyncProvider>
         <ThemeProvider>
-          <div className="mesh-bg" />
           <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.02),transparent_50%)] pointer-events-none" />
           <SidebarWrapper />
           <ContentWrapper>
