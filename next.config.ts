@@ -2,8 +2,7 @@ import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === 'production';
 
-// @ts-ignore - allowedDevOrigins might not be in the types yet
-const nextConfig: NextConfig & { allowedDevOrigins?: string[] } = {
+const nextConfig = {
   reactCompiler: true,
   output: 'export',
   // Only prefix with /novice if we are actually building for production
@@ -12,14 +11,10 @@ const nextConfig: NextConfig & { allowedDevOrigins?: string[] } = {
   images: {
     unoptimized: true,
   },
-  devIndicators: {
-    appIsrStatus: false,
-    buildActivity: false,
-    appIsrStatusPosition: 'bottom-right',
-    buildActivityPosition: 'bottom-right',
+  experimental: {
+    // Allow the local IP and common dev hosts
+    allowedDevOrigins: ['localhost:3000', '192.168.56.1', '127.0.0.1:3000', '0.0.0.0:3000'],
   },
-  // Allow the local IP and common dev hosts
-  allowedDevOrigins: ['localhost:3000', '192.168.56.1', '127.0.0.1:3000', '0.0.0.0:3000'],
-};
+} as any;
 
 export default nextConfig;
