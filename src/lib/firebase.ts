@@ -14,6 +14,11 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
+// Validate config to prevent blank screen crashes
+if (!firebaseConfig.apiKey && typeof window !== "undefined") {
+  console.warn("Firebase API Key is missing. Check your .env.local file.");
+}
+
 // Initialize Firebase
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
