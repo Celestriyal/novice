@@ -151,11 +151,6 @@
   --radius-xl: var(--radius);
 }
 
-* {
-  border-color: var(--border);
-  border-width: var(--border-width);
-}
-
 body {
   background-color: var(--background);
   color: var(--foreground);

@@ -24,7 +24,10 @@ import {
   Zap,
   Coffee,
   Brain,
-  Rocket
+  Rocket,
+  Edit2,
+  Check,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,8 +39,10 @@ const subjectIcons = [
 ];
 
 export default function SubjectsPage() {
-  const { subjects, addSubject, deleteSubject } = useStore();
+  const { subjects, addSubject, updateSubject, deleteSubject } = useStore();
   const [newSubjectName, setNewSubjectName] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Handle hydration to avoid mismatch with localStorage
@@ -50,6 +55,18 @@ export default function SubjectsPage() {
     if (newSubjectName.trim()) {
       addSubject(newSubjectName.trim());
       setNewSubjectName('');
+    }
+  };
+
+  const startEditing = (id: string, name: string) => {
+    setEditingId(id);
+    setEditName(name);
+  };
+
+  const handleUpdate = (id: string) => {
+    if (editName.trim()) {
+      updateSubject(id, editName.trim());
+      setEditingId(null);
     }
   };
 
@@ -111,19 +128,44 @@ export default function SubjectsPage() {
                     )}>
                       <IconComponent className="w-5 h-5" />
                     </div>
-                    <button
-                      onClick={() => deleteSubject(subject.id)}
-                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => startEditing(subject.id, subject.name)}
+                        className="text-muted-foreground hover:text-primary transition-colors p-1"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteSubject(subject.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-xl font-semibold tracking-tight">{subject.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Added {new Date(subject.createdAt).toLocaleDateString()}
-                    </p>
+                    {editingId === subject.id ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <input
+                          type="text"
+                          autoFocus
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleUpdate(subject.id)}
+                          className="bg-black border border-primary/50 rounded-lg px-2 py-1 text-sm focus:outline-none w-full"
+                        />
+                        <button onClick={() => handleUpdate(subject.id)} className="text-success hover:scale-110 transition-transform"><Check className="w-4 h-4" /></button>
+                        <button onClick={() => setEditingId(null)} className="text-destructive hover:scale-110 transition-transform"><X className="w-4 h-4" /></button>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="text-xl font-semibold tracking-tight">{subject.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Added {new Date(subject.createdAt).toLocaleDateString()}
+                        </p>
+                      </>
+                    )}
                   </div>
 
                   <div className="pt-2 mt-auto">

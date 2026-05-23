@@ -2,24 +2,85 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useRouter, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
+interface UserProfile {
+  name: string;
+  email: string;
+  role: string;
+  dept?: string;
+  rollNo?: string;
+  semester?: string;
+  createdAt: number;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true });
+interface AuthContextType {
+  user: User | null;
+  profile: UserProfile | null;
+  loading: boolean;
+  isAdmin: boolean;
+  isProfileComplete: boolean;
+  refreshProfile: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType>({ 
+  user: null, 
+  profile: null,
+  loading: true, 
+  isAdmin: false,
+  isProfileComplete: true,
+  refreshProfile: async () => {}
+});
 
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+
+  const isProfileComplete = !!(
+    profile?.name && 
+    profile?.dept && 
+    profile?.rollNo && 
+    profile?.semester
+  );
+
+  const fetchProfile = async (firebaseUser: User) => {
+    try {
+      const userDocRef = doc(db, 'users', firebaseUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as UserProfile;
+        setProfile(userData);
+        setIsAdmin(userData.role === 'admin');
+        
+        // Sync email if missing
+        if (!userData.email) {
+          await setDoc(userDocRef, { email: firebaseUser.email }, { merge: true });
+        }
+      } else {
+        // Doc might not exist yet if registration is in progress
+        setProfile(null);
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user);
+    }
+  };
 
   useEffect(() => {
     if (!auth) {
@@ -27,29 +88,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Force load after 5 seconds if Firebase doesn't respond
-    const forceLoadTimeout = setTimeout(() => {
-      console.warn("Auth took too long, forcing load...");
-      setLoading(false);
-    }, 5000);
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      clearTimeout(forceLoadTimeout);
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      
+      if (firebaseUser) {
+        await fetchProfile(firebaseUser);
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
+      }
+      
       setLoading(false);
       
       // Redirect logic
-      if (!user && pathname !== '/login') {
+      if (!firebaseUser && pathname !== '/login') {
         router.push('/login');
-      } else if (user && pathname === '/login') {
+      } else if (firebaseUser && pathname === '/login') {
         router.push('/');
       }
     });
 
-    return () => {
-      unsubscribe();
-      clearTimeout(forceLoadTimeout);
-    };
+    return () => unsubscribe();
   }, [pathname, router]);
 
   if (loading) {
@@ -66,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isProfileComplete, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

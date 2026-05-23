@@ -8,20 +8,40 @@ import {
   Filter, 
   CheckCircle2, 
   Circle,
-  BookOpen
+  BookOpen,
+  Edit2,
+  Trash2,
+  Check,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export default function TasksPage() {
-  const { subjects, subtopics, topics, toggleTopic } = useStore();
+  const { subjects, subtopics, topics, updateTopic, deleteTopic, toggleTopic } = useStore();
   const [isHydrated, setIsHydrated] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
+  // Edit states
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editTopicName, setEditTopicName] = useState('');
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  const startEditingTopic = (id: string, name: string) => {
+    setEditingTopicId(id);
+    setEditTopicName(name);
+  };
+
+  const handleUpdateTopic = (id: string) => {
+    if (editTopicName.trim()) {
+      updateTopic(id, editTopicName.trim());
+      setEditingTopicId(null);
+    }
+  };
 
   if (!isHydrated) return null;
 
@@ -100,13 +120,28 @@ export default function TasksPage() {
                         <Circle className="w-6 h-6" />
                       )}
                     </button>
-                    <div>
-                      <h3 className={cn(
-                        "font-semibold transition-all duration-300",
-                        topic.isCompleted ? "text-muted-foreground line-through" : "text-foreground"
-                      )}>
-                        {topic.name}
-                      </h3>
+                    <div className="flex-1 min-w-0">
+                      {editingTopicId === topic.id ? (
+                        <div className="flex items-center gap-2 max-w-md">
+                          <input
+                            type="text"
+                            autoFocus
+                            value={editTopicName}
+                            onChange={(e) => setEditTopicName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleUpdateTopic(topic.id)}
+                            className="bg-black border border-primary/50 rounded-lg px-2 py-1 text-sm focus:outline-none w-full"
+                          />
+                          <button onClick={() => handleUpdateTopic(topic.id)} className="text-success hover:scale-110 transition-transform shrink-0"><Check className="w-4 h-4" /></button>
+                          <button onClick={() => setEditingTopicId(null)} className="text-destructive hover:scale-110 transition-transform shrink-0"><X className="w-4 h-4" /></button>
+                        </div>
+                      ) : (
+                        <h3 className={cn(
+                          "font-semibold transition-all duration-300 truncate",
+                          topic.isCompleted ? "text-muted-foreground line-through" : "text-foreground"
+                        )}>
+                          {topic.name}
+                        </h3>
+                      )}
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[10px] bg-secondary px-2 py-0.5 rounded text-muted-foreground font-bold uppercase tracking-widest">
                           {subject?.name || 'Unknown'}
@@ -119,12 +154,29 @@ export default function TasksPage() {
                     </div>
                   </div>
                   
-                  {topic.isCompleted && topic.completedAt && (
-                    <div className="text-right">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Completed</p>
-                      <p className="text-xs font-medium">{new Date(topic.completedAt).toLocaleDateString()}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <button
+                        onClick={() => startEditingTopic(topic.id, topic.name)}
+                        className="text-muted-foreground hover:text-primary transition-all p-1.5 rounded-lg hover:bg-white/5"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteTopic(topic.id)}
+                        className="text-muted-foreground hover:text-destructive transition-all p-1.5 rounded-lg hover:bg-white/5"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  )}
+                    
+                    {topic.isCompleted && topic.completedAt && (
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Completed</p>
+                        <p className="text-xs font-medium">{new Date(topic.completedAt).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               );
             })

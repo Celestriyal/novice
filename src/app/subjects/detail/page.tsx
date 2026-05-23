@@ -11,7 +11,10 @@ import {
   Circle, 
   MoreVertical,
   Layers,
-  CheckCircle
+  CheckCircle,
+  Edit2,
+  Check,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,8 +30,10 @@ export default function SubjectDetailPage() {
     subtopics, 
     topics, 
     addSubtopic, 
+    updateSubtopic,
     deleteSubtopic,
     addTopic,
+    updateTopic,
     deleteTopic,
     toggleTopic
   } = useStore();
@@ -37,6 +42,12 @@ export default function SubjectDetailPage() {
   const [newSubtopicName, setNewSubtopicName] = useState('');
   const [activeSubtopicId, setActiveSubtopicId] = useState<string | null>(null);
   const [newTopicName, setNewTopicName] = useState('');
+
+  // Edit states
+  const [editingSubtopicId, setEditingSubtopicId] = useState<string | null>(null);
+  const [editSubtopicName, setEditSubtopicName] = useState('');
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editTopicName, setEditTopicName] = useState('');
 
   useEffect(() => {
     setIsHydrated(true);
@@ -69,6 +80,30 @@ export default function SubjectDetailPage() {
       addTopic(stId, newTopicName.trim());
       setNewTopicName('');
       setActiveSubtopicId(null);
+    }
+  };
+
+  const startEditingSubtopic = (id: string, name: string) => {
+    setEditingSubtopicId(id);
+    setEditSubtopicName(name);
+  };
+
+  const handleUpdateSubtopic = (id: string) => {
+    if (editSubtopicName.trim()) {
+      updateSubtopic(id, editSubtopicName.trim());
+      setEditingSubtopicId(null);
+    }
+  };
+
+  const startEditingTopic = (id: string, name: string) => {
+    setEditingTopicId(id);
+    setEditTopicName(name);
+  };
+
+  const handleUpdateTopic = (id: string) => {
+    if (editTopicName.trim()) {
+      updateTopic(id, editTopicName.trim());
+      setEditingTopicId(null);
     }
   };
 
@@ -131,7 +166,22 @@ export default function SubjectDetailPage() {
                           <Layers className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-lg">{subtopic.name}</h3>
+                          {editingSubtopicId === subtopic.id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                autoFocus
+                                value={editSubtopicName}
+                                onChange={(e) => setEditSubtopicName(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleUpdateSubtopic(subtopic.id)}
+                                className="bg-black border border-primary/50 rounded-lg px-2 py-1 text-sm focus:outline-none w-full"
+                              />
+                              <button onClick={() => handleUpdateSubtopic(subtopic.id)} className="text-success hover:scale-110 transition-transform"><Check className="w-4 h-4" /></button>
+                              <button onClick={() => setEditingSubtopicId(null)} className="text-destructive hover:scale-110 transition-transform"><X className="w-4 h-4" /></button>
+                            </div>
+                          ) : (
+                            <h3 className="font-semibold text-lg">{subtopic.name}</h3>
+                          )}
                           <div className="flex items-center gap-2 mt-1">
                             <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
                               <div 
@@ -146,6 +196,12 @@ export default function SubjectDetailPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => startEditingSubtopic(subtopic.id, subtopic.name)}
+                          className="w-8 h-8 rounded flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => setActiveSubtopicId(activeSubtopicId === subtopic.id ? null : subtopic.id)}
                           className={cn(
@@ -199,11 +255,11 @@ export default function SubjectDetailPage() {
                             exit={{ opacity: 0, scale: 0.98 }}
                             className="group flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
                           >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
                               <button
                                 onClick={() => toggleTopic(topic.id)}
                                 className={cn(
-                                  "transition-all duration-300",
+                                  "transition-all duration-300 shrink-0",
                                   topic.isCompleted ? "text-primary scale-110" : "text-muted-foreground hover:text-foreground"
                                 )}
                               >
@@ -213,19 +269,42 @@ export default function SubjectDetailPage() {
                                   <Circle className="w-5 h-5" />
                                 )}
                               </button>
-                              <span className={cn(
-                                "text-sm font-medium transition-all duration-300",
-                                topic.isCompleted ? "text-muted-foreground line-through" : "text-foreground"
-                              )}>
-                                {topic.name}
-                              </span>
+                              {editingTopicId === topic.id ? (
+                                <div className="flex items-center gap-2 flex-1">
+                                  <input
+                                    type="text"
+                                    autoFocus
+                                    value={editTopicName}
+                                    onChange={(e) => setEditTopicName(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleUpdateTopic(topic.id)}
+                                    className="bg-black border border-primary/50 rounded-lg px-2 py-1 text-sm focus:outline-none w-full"
+                                  />
+                                  <button onClick={() => handleUpdateTopic(topic.id)} className="text-success hover:scale-110 transition-transform"><Check className="w-4 h-4" /></button>
+                                  <button onClick={() => setEditingTopicId(null)} className="text-destructive hover:scale-110 transition-transform"><X className="w-4 h-4" /></button>
+                                </div>
+                              ) : (
+                                <span className={cn(
+                                  "text-sm font-medium transition-all duration-300 truncate",
+                                  topic.isCompleted ? "text-muted-foreground line-through" : "text-foreground"
+                                )}>
+                                  {topic.name}
+                                </span>
+                              )}
                             </div>
-                            <button
-                              onClick={() => deleteTopic(topic.id)}
-                              className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                              <button
+                                onClick={() => startEditingTopic(topic.id, topic.name)}
+                                className="text-muted-foreground hover:text-primary transition-all p-1"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => deleteTopic(topic.id)}
+                                className="text-muted-foreground hover:text-destructive transition-all p-1"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </motion.div>
                         ))}
                       </AnimatePresence>

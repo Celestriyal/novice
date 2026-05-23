@@ -8,9 +8,12 @@ import { useStore } from '@/store/useStore';
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const { subjects, subtopics, topics, theme, setUserId, setAllData, setTheme } = useStore();
+  const { subjects, subtopics, topics, theme, impersonatedUserId, setUserId, setAllData, setTheme } = useStore();
   const isInitialMount = useRef(true);
   const isSyncingFromRemote = useRef(false);
+
+  // Determine which UID to sync with
+  const effectiveUserId = impersonatedUserId || user?.uid;
 
   // Sync userId to store
   useEffect(() => {
@@ -19,9 +22,9 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
   // Handle Remote -> Local Sync (Real-time updates)
   useEffect(() => {
-    if (!user) return;
+    if (!effectiveUserId) return;
 
-    const userDocRef = doc(db, 'users', user.uid);
+    const userDocRef = doc(db, 'users', effectiveUserId);
     
     const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -44,18 +47,19 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         setTimeout(() => { isSyncingFromRemote.current = false; }, 100);
       } else {
         // First time user? Let's push existing local data if any
-        if (subjects.length > 0 || subtopics.length > 0 || topics.length > 0) {
-           setDoc(userDocRef, { subjects, subtopics, topics, theme });
+        // Only if NOT impersonating (don't want to overwrite target user with local data accidentally)
+        if (!impersonatedUserId && (subjects.length > 0 || subtopics.length > 0 || topics.length > 0)) {
+           setDoc(userDocRef, { subjects, subtopics, topics, theme }, { merge: true });
         }
       }
     });
 
     return () => unsubscribe();
-  }, [user, setAllData, setTheme]);
+  }, [effectiveUserId, setAllData, setTheme, impersonatedUserId]); // Added impersonatedUserId to deps to re-run when switching
 
   // Handle Local -> Remote Sync (Push changes)
   useEffect(() => {
-    if (!user || isSyncingFromRemote.current) return;
+    if (!effectiveUserId || isSyncingFromRemote.current) return;
     
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -63,12 +67,12 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     }
 
     const timer = setTimeout(() => {
-      const userDocRef = doc(db, 'users', user.uid);
+      const userDocRef = doc(db, 'users', effectiveUserId);
       setDoc(userDocRef, { subjects, subtopics, topics, theme }, { merge: true });
     }, 1000); // Debounce push to Firestore
 
     return () => clearTimeout(timer);
-  }, [subjects, subtopics, topics, theme, user]);
+  }, [subjects, subtopics, topics, theme, effectiveUserId]);
 
   return <>{children}</>;
 }

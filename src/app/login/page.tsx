@@ -7,17 +7,24 @@ import {
   signInWithPopup,
   GoogleAuthProvider
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { motion } from 'framer-motion';
-import { LogIn, UserPlus, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, ArrowRight, Loader2, User as UserIcon, Book, Hash, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [dept, setDept] = useState('');
+  const [rollNo, setRollNo] = useState('');
+  const [semester, setSemester] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +35,21 @@ export default function LoginPage() {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Create user document in Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+          name,
+          email,
+          dept,
+          rollNo,
+          semester,
+          role: 'user',
+          createdAt: Date.now()
+        });
       }
+      router.push('/');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -40,7 +60,22 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Check if user doc exists, if not create a basic one
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          name: user.displayName || '',
+          email: user.email,
+          role: 'user',
+          createdAt: Date.now()
+        });
+      }
+      router.push('/');
     } catch (err: any) {
       setError(err.message);
     }
@@ -72,6 +107,74 @@ export default function LoginPage() {
 
         <div className="bg-[#080808] border border-white/5 rounded-3xl p-8 glass-card">
           <form onSubmit={handleAuth} className="space-y-4">
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-white/30 transition-colors"
+                      placeholder="John Doe"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Department</label>
+                    <div className="relative">
+                      <Book className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        required
+                        value={dept}
+                        onChange={(e) => setDept(e.target.value)}
+                        className="w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-white/30 transition-colors"
+                        placeholder="CSE"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Roll No</label>
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        required
+                        value={rollNo}
+                        onChange={(e) => setRollNo(e.target.value)}
+                        className="w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-white/30 transition-colors"
+                        placeholder="12345"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Semester</label>
+                  <div className="relative">
+                    <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <select
+                      required
+                      value={semester}
+                      onChange={(e) => setSemester(e.target.value)}
+                      className="w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-white/30 transition-colors appearance-none"
+                    >
+                      <option value="" disabled>Select Semester</option>
+                      {[1,2,3,4,5,6,7,8].map(s => (
+                        <option key={s} value={s}>{s}th Semester</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</label>
               <div className="relative">

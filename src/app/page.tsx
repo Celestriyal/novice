@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/store/useStore';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { 
   BarChart, 
   Bar, 
@@ -20,13 +21,15 @@ import {
   BookOpen, 
   TrendingUp, 
   Clock,
-  LayoutDashboard
+  LayoutDashboard,
+  GraduationCap
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
   const { subjects, topics, theme } = useStore();
+  const { profile } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -85,8 +88,15 @@ export default function Dashboard() {
     <div className="space-y-8 pb-20">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Overview of your learning journey.</p>
+          <h1 className="text-3xl font-black tracking-tighter uppercase italic">
+            Welcome, {profile?.name || 'Scholar'}
+          </h1>
+          <div className="flex items-center gap-2 mt-1">
+            <GraduationCap className="w-3 h-3 text-primary" />
+            <p className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">
+              {profile?.dept || 'No Department'} • {profile?.rollNo || 'No Roll No'}
+            </p>
+          </div>
         </div>
       </div>
 

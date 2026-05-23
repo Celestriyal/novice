@@ -2,6 +2,8 @@
 
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { CompleteProfile } from "@/components/layout/CompleteProfile";
+import { UndoToast } from "@/components/layout/UndoToast";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
@@ -14,14 +16,37 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
       <SyncProvider>
         <ThemeProvider>
           <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.02),transparent_50%)] pointer-events-none" />
-          <SidebarWrapper />
-          <ContentWrapper>
+          <MainContent>
             {children}
-          </ContentWrapper>
-          <BottomNavWrapper />
+          </MainContent>
+          <UndoToast />
         </ThemeProvider>
       </SyncProvider>
     </AuthProvider>
+  );
+}
+
+function MainContent({ children }: { children: React.ReactNode }) {
+  const { user, isProfileComplete, loading } = useAuth();
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/login';
+
+  if (loading) return null;
+
+  // If logged in but profile is incomplete, force profile completion
+  // Except on login page (where they are signing up/in)
+  if (user && !isProfileComplete && !isLoginPage) {
+    return <CompleteProfile />;
+  }
+
+  return (
+    <>
+      <SidebarWrapper />
+      <ContentWrapper>
+        {children}
+      </ContentWrapper>
+      <BottomNavWrapper />
+    </>
   );
 }
 
