@@ -122,7 +122,7 @@ export default function SettingsPage() {
     }
   };
 
-  const isGoogleOnly = user?.providerData.length === 1 && user.providerData[0].providerId === 'google.com';
+  const isGoogleOnly = user?.providerData?.length === 1 && user.providerData[0].providerId === 'google.com';
 
   const themes: { id: AppTheme; name: string; description: string; icon: any; color: string }[] = [
     {
