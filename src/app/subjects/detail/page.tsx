@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useStore } from '@/store/useStore';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { 
@@ -9,18 +9,18 @@ import {
   ChevronLeft, 
   CheckCircle2, 
   Circle, 
-  MoreVertical,
   Layers,
   CheckCircle,
   Edit2,
   Check,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-export default function SubjectDetailPage() {
+function SubjectDetailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const subjectId = searchParams.get('id');
@@ -123,7 +123,6 @@ export default function SubjectDetailPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Column: Subtopic List */}
         <div className="flex-1 space-y-6">
           <form onSubmit={handleAddSubtopic} className="flex gap-2">
             <input
@@ -334,7 +333,6 @@ export default function SubjectDetailPage() {
           </div>
         </div>
 
-        {/* Right Column: Progress Summary Card */}
         <div className="lg:w-80 space-y-6">
           <div className="bg-card border border-border rounded-xl p-6 sticky top-8">
             <h3 className="font-bold text-lg mb-4">Subject Progress</h3>
@@ -407,5 +405,17 @@ export default function SubjectDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SubjectDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <SubjectDetailContent />
+    </Suspense>
   );
 }
