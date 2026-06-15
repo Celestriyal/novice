@@ -55,15 +55,15 @@ export default function TasksPage() {
   });
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-6 sm:space-y-8 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-          <p className="text-muted-foreground mt-1">All your learning topics in one place.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tasks</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">All your learning topics in one place.</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
@@ -79,7 +79,7 @@ export default function TasksPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "px-3 py-1 rounded-md text-xs font-medium capitalize transition-all",
+                  "flex-1 sm:flex-none px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-xs font-medium capitalize transition-all",
                   filter === f ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -90,7 +90,7 @@ export default function TasksPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <AnimatePresence mode="popLayout">
           {filteredTopics.length > 0 ? (
             filteredTopics.map((topic) => {
@@ -104,25 +104,25 @@ export default function TasksPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.98 }}
-                  className="bg-card border border-border rounded-xl p-4 flex items-center justify-between hover:border-primary/30 transition-colors"
+                  className="bg-card border border-border rounded-xl p-3 sm:p-4 flex items-center justify-between hover:border-primary/30 transition-colors gap-3"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                     <button
                       onClick={() => toggleTopic(topic.id)}
                       className={cn(
-                        "transition-all duration-300",
+                        "transition-all duration-300 shrink-0",
                         topic.isCompleted ? "text-primary scale-110" : "text-muted-foreground hover:text-foreground"
                       )}
                     >
                       {topic.isCompleted ? (
-                        <CheckCircle2 className="w-6 h-6" />
+                        <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
                       ) : (
-                        <Circle className="w-6 h-6" />
+                        <Circle className="w-5 h-5 sm:w-6 sm:h-6" />
                       )}
                     </button>
                     <div className="flex-1 min-w-0">
                       {editingTopicId === topic.id ? (
-                        <div className="flex items-center gap-2 max-w-md">
+                        <div className="flex items-center gap-2">
                           <input
                             type="text"
                             autoFocus
@@ -136,42 +136,42 @@ export default function TasksPage() {
                         </div>
                       ) : (
                         <h3 className={cn(
-                          "font-semibold transition-all duration-300 truncate",
+                          "text-sm sm:text-base font-semibold transition-all duration-300 truncate",
                           topic.isCompleted ? "text-muted-foreground line-through" : "text-foreground"
                         )}>
                           {topic.name}
                         </h3>
                       )}
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] bg-secondary px-2 py-0.5 rounded text-muted-foreground font-bold uppercase tracking-widest">
+                      <div className="flex items-center gap-2 mt-0.5 sm:mt-1">
+                        <span className="text-[9px] sm:text-[10px] bg-secondary px-1.5 sm:px-2 py-0.5 rounded text-muted-foreground font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">
                           {subject?.name || 'Unknown'}
                         </span>
                         <span className="text-[10px] text-muted-foreground/50">•</span>
-                        <span className="text-[10px] text-muted-foreground font-medium italic">
+                        <span className="text-[9px] sm:text-[10px] text-muted-foreground font-medium italic truncate">
                           {subtopic?.name || 'General'}
                         </span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all">
                       <button
                         onClick={() => startEditingTopic(topic.id, topic.name)}
-                        className="text-muted-foreground hover:text-primary transition-all p-1.5 rounded-lg hover:bg-white/5"
+                        className="text-muted-foreground hover:text-primary transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/5"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                       <button
                         onClick={() => deleteTopic(topic.id)}
-                        className="text-muted-foreground hover:text-destructive transition-all p-1.5 rounded-lg hover:bg-white/5"
+                        className="text-muted-foreground hover:text-destructive transition-all p-1 sm:p-1.5 rounded-lg hover:bg-white/5"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                     
                     {topic.isCompleted && topic.completedAt && (
-                      <div className="text-right shrink-0">
+                      <div className="text-right hidden sm:block">
                         <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Completed</p>
                         <p className="text-xs font-medium">{new Date(topic.completedAt).toLocaleDateString()}</p>
                       </div>
@@ -181,13 +181,13 @@ export default function TasksPage() {
               );
             })
           ) : (
-            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-border rounded-xl">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center text-muted-foreground">
-                <CheckSquare className="w-8 h-8" />
+            <div className="py-12 sm:py-20 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-border rounded-xl">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center text-muted-foreground">
+                <CheckSquare className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
               <div>
-                <h3 className="text-lg font-medium">No tasks found</h3>
-                <p className="text-muted-foreground">Try adjusting your search or filter.</p>
+                <h3 className="text-base sm:text-lg font-medium">No tasks found</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Try adjusting your search or filter.</p>
               </div>
             </div>
           )}

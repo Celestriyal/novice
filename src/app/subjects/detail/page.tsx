@@ -117,8 +117,8 @@ function SubjectDetailContent() {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{subject.name}</h1>
-          <p className="text-muted-foreground mt-1">Manage subtopics and individual topics.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{subject.name}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Manage subtopics and individual topics.</p>
         </div>
       </div>
 
@@ -129,16 +129,16 @@ function SubjectDetailContent() {
               type="text"
               value={newSubtopicName}
               onChange={(e) => setNewSubtopicName(e.target.value)}
-              placeholder="New subtopic name..."
+              placeholder="New subtopic..."
               className="flex-1 bg-secondary border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
             <button
               type="submit"
               disabled={!newSubtopicName.trim()}
-              className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50 transition-opacity whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              Add
+              <span className="hidden sm:inline">Add</span>
             </button>
           </form>
 
@@ -159,12 +159,12 @@ function SubjectDetailContent() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     className="bg-card border border-border rounded-xl overflow-hidden"
                   >
-                    <div className="p-4 bg-secondary/30 flex items-center justify-between border-b border-border">
+                    <div className="p-4 bg-secondary/30 flex flex-col sm:flex-row sm:items-center justify-between border-b border-border gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-muted rounded flex items-center justify-center text-primary-foreground">
+                        <div className="w-8 h-8 bg-muted rounded flex items-center justify-center text-primary-foreground shrink-0">
                           <Layers className="w-4 h-4 text-muted-foreground" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           {editingSubtopicId === subtopic.id ? (
                             <div className="flex items-center gap-2">
                               <input
@@ -179,10 +179,10 @@ function SubjectDetailContent() {
                               <button onClick={() => setEditingSubtopicId(null)} className="text-destructive hover:scale-110 transition-transform"><X className="w-4 h-4" /></button>
                             </div>
                           ) : (
-                            <h3 className="font-semibold text-lg">{subtopic.name}</h3>
+                            <h3 className="font-semibold text-base sm:text-lg truncate">{subtopic.name}</h3>
                           )}
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div className="w-16 sm:w-24 h-1.5 bg-muted rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-primary transition-all duration-500" 
                                 style={{ width: `${progress}%` }}
@@ -194,7 +194,7 @@ function SubjectDetailContent() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => startEditingSubtopic(subtopic.id, subtopic.name)}
                           className="w-8 h-8 rounded flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors"
@@ -252,7 +252,7 @@ function SubjectDetailContent() {
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.98 }}
-                            className="group flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                            className="group flex items-center justify-between p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors gap-2"
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <button
@@ -290,7 +290,7 @@ function SubjectDetailContent() {
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                            <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0">
                               <button
                                 onClick={() => startEditingTopic(topic.id, topic.name)}
                                 className="text-muted-foreground hover:text-primary transition-all p-1"
@@ -320,13 +320,13 @@ function SubjectDetailContent() {
             </AnimatePresence>
 
             {filteredSubtopics.length === 0 && (
-              <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-border rounded-xl">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center text-muted-foreground">
-                  <Plus className="w-8 h-8" />
+              <div className="py-12 sm:py-20 flex flex-col items-center justify-center text-center space-y-4 border-2 border-dashed border-border rounded-xl">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center text-muted-foreground">
+                  <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium">No subtopics yet</h3>
-                  <p className="text-muted-foreground">Break down this subject into smaller subtopics.</p>
+                  <h3 className="text-base sm:text-lg font-medium">No subtopics yet</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Break down this subject into smaller subtopics.</p>
                 </div>
               </div>
             )}
@@ -334,7 +334,7 @@ function SubjectDetailContent() {
         </div>
 
         <div className="lg:w-80 space-y-6">
-          <div className="bg-card border border-border rounded-xl p-6 sticky top-8">
+          <div className="bg-card border border-border rounded-xl p-6 lg:sticky lg:top-8">
             <h3 className="font-bold text-lg mb-4">Subject Progress</h3>
             
             {(() => {
@@ -347,7 +347,7 @@ function SubjectDetailContent() {
 
               return (
                 <div className="space-y-6">
-                  <div className="relative w-32 h-32 mx-auto">
+                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto">
                     <svg className="w-full h-full" viewBox="0 0 100 100">
                       <circle 
                         className="text-muted stroke-current" 
@@ -372,8 +372,8 @@ function SubjectDetailContent() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-bold">{percentage}%</span>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Done</span>
+                      <span className="text-xl sm:text-2xl font-bold">{percentage}%</span>
+                      <span className="text-[8px] sm:text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Done</span>
                     </div>
                   </div>
 
