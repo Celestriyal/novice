@@ -39,6 +39,8 @@ export default function SettingsPage() {
   // Profile Update State
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState(profile?.name || '');
+  const [isEditingSemester, setIsEditingSemester] = useState(false);
+  const [newSemester, setNewSemester] = useState(profile?.semester || '');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   // Password Update State
@@ -52,6 +54,7 @@ export default function SettingsPage() {
   useEffect(() => {
     setIsHydrated(true);
     if (profile?.name) setNewName(profile.name);
+    if (profile?.semester) setNewSemester(profile.semester);
   }, [profile]);
 
   if (!isHydrated) return null;
@@ -76,6 +79,22 @@ export default function SettingsPage() {
       setIsEditingName(false);
     } catch (error) {
       console.error("Failed to update name:", error);
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleUpdateSemester = async () => {
+    if (!user || !newSemester) return;
+    setIsUpdatingProfile(true);
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        semester: newSemester
+      });
+      await refreshProfile();
+      setIsEditingSemester(false);
+    } catch (error) {
+      console.error("Failed to update semester:", error);
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -266,11 +285,53 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground block mb-1">Current Semester</span>
-              <span className="text-sm font-bold">{profile?.semester ? `${profile.semester}th Semester` : '—'}</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground block mb-1">Current Semester</span>
+                  {isEditingSemester ? (
+                    <select
+                      value={newSemester}
+                      onChange={(e) => setNewSemester(e.target.value)}
+                      className="bg-black border border-white/10 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-primary/50"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                        <option key={s} value={s.toString()}>{s}th Semester</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="text-sm font-bold">{profile?.semester ? `${profile.semester}th Semester` : '—'}</span>
+                  )}
+                </div>
+                
+                {isEditingSemester ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleUpdateSemester}
+                      disabled={isUpdatingProfile}
+                      className="p-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                    >
+                      {isUpdatingProfile ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                    </button>
+                    <button
+                      onClick={() => { setIsEditingSemester(false); setNewSemester(profile?.semester || ''); }}
+                      className="p-2 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsEditingSemester(true)}
+                    className="p-2 bg-white/5 text-muted-foreground rounded-lg hover:bg-white/10 hover:text-white transition-all"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
             </div>
+
             <p className="text-[9px] text-muted-foreground font-medium italic mt-2 opacity-50">
-              * To change academic details, please contact the system administrator.
+              * To change department or roll number, please contact the system administrator.
             </p>
           </div>
         </div>
